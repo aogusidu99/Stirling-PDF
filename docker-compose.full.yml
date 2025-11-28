@@ -1,0 +1,34 @@
+services:
+  stirling-pdf:
+    container_name: stirling-pdf-full
+    image: docker.stirlingpdf.com/stirlingtools/stirling-pdf:latest
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/api/v1/info/status | grep -q 'UP'"]
+      interval: 5s
+      timeout: 10s
+      retries: 16
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./stirling/data:/usr/share/tessdata:rw
+      - ./stirling/config:/configs:rw
+      - ./stirling/logs:/logs:rw
+    environment:
+      # Enable the full feature set (login/security endpoints, pipelines, etc.)
+      DISABLE_ADDITIONAL_FEATURES: "false"
+      SECURITY_ENABLELOGIN: "false"
+      PUID: 1000
+      PGID: 1000
+      UMASK: "022"
+      SYSTEM_DEFAULTLOCALE: en-US
+      UI_APPNAME: Stirling-PDF
+      UI_HOMEDESCRIPTION: Local full build of Stirling-PDF
+      UI_APPNAMENAVBAR: Stirling-PDF
+      SYSTEM_MAXFILESIZE: "100"
+      METRICS_ENABLED: "true"
+      SYSTEM_GOOGLEVISIBILITY: "false"
+    restart: on-failure:5
